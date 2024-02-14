@@ -2,10 +2,6 @@
 using UnityEngine;
 
 namespace src {
-	public struct PlayerData : IComponentData {
-		public int Health;
-	}
-	
 	public class PlayerAuthoring : MonoBehaviour {
 		[field: SerializeField] public float InitialMovementSpeed { get; private set; } = 1.0f;
 		

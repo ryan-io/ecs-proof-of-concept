@@ -1,16 +1,9 @@
-// Assembly-CSharp
-
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace src {
-	public struct WeaponAttachmentData : IComponentData {
-		public Entity Pivot;
-		public float3 Offset;
-	}
-	
 	public class WeaponAttachmentAuthoring : MonoBehaviour {
 		[field: SerializeField, Required] public GameObject Pivot { get; private set; }
 

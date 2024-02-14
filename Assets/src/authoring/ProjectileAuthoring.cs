@@ -2,10 +2,6 @@
 using UnityEngine;
 
 namespace src {
-	public struct ProjectileData : IComponentData {
-		public Entity Prefab;
-	}
-
 	public class ProjectileAuthoring : MonoBehaviour {
 		[field: SerializeField] public GameObject Prefab { get; private set; }
 		

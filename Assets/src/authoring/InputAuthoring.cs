@@ -1,24 +1,7 @@
 ﻿using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace src {
-	public struct InputData : IComponentData {
-		public float2 Directional;
-	}
-	
-	public struct PlayerWeakAttackInputTag : IComponentData, IEnableableComponent {
-		public int TestInt;
-	}
-
-	public struct PlayerStrongAttackInputTag : IComponentData, IEnableableComponent {
-		
-	}
-	
-	public struct PlayerDodgeInputTag : IComponentData, IEnableableComponent {
-		
-	}
-    
 	public class InputAuthoring : MonoBehaviour {
 		public class InputAuthoringBaker : Baker<InputAuthoring> {
 			public override void Bake(InputAuthoring authoring) {

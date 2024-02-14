@@ -1,13 +1,7 @@
-// Assembly-CSharp
-
 using Unity.Entities;
 using UnityEngine;
 
 namespace src {
-	public struct MovementModifierData : IComponentData {
-		public float Speed;
-	}
-	
 	public class MovementModifierAuthoring : MonoBehaviour {
 		[field: SerializeField] public float Penalty { get; private set; }
 

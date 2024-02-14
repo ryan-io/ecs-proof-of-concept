@@ -1,14 +1,8 @@
-// Assembly-CSharp
-
 using Sirenix.OdinInspector;
 using Unity.Entities;
 using UnityEngine;
 
 namespace src {
-	public struct EquippableData : IComponentData {
-		public Entity Prefab;
-	}
-	
 	public class EquippableAuthoring : MonoBehaviour {
 		[field: SerializeField, Required] public GameObject Prefab { get; private set; }
 
