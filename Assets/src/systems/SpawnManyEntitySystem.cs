@@ -75,7 +75,6 @@ namespace src.systems {
 		public void Execute() {
 			// https: //sighack.com/post/poisson-disk-sampling-bridsons-algorithm
 
-			var initialCapacity = Width * Height;
 			var grid            = new NativeArray<float3>(65356, Allocator.Temp);
 			var activeList      = new NativeList<float3>(65356, Allocator.Temp);
 
@@ -178,7 +177,6 @@ namespace src.systems {
 			var instances = new NativeArray<Entity>(Positions.Length, Allocator.Temp);
 
 			ParallelWriter.Instantiate(chunkIndex, data.Entity, instances);
-
 
 			for (int i = 0; i < Positions.Length; i++) {
 				ParallelWriter.SetComponent(chunkIndex, instances[i], new LocalTransform {
