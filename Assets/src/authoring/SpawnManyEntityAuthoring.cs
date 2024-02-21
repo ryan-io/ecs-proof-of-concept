@@ -26,7 +26,8 @@ namespace src {
 					RegionWidth             = width,
 					RegionHeight            = height
 				});
-
+	
+				
 				//SetComponentEnabled<SpawnManyEntityData>(entity, false);
 			}
 		}
