@@ -3,7 +3,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace src.systems {
+namespace src {
 	public struct RandomNumGenData : IComponentData {
 		public Random Value;
 	}

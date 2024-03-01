@@ -1,4 +1,5 @@
 ﻿using src.systems;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace src {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
 				var width  = math.abs(authoring.RegionWidth);
 				var height = math.abs(authoring.RegionHeight);
-
+  
 				AddComponent(entity, new SpawnManyEntityData {
 					Count                   = authoring.SpawnCount,
 					Entity                  = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
@@ -26,8 +27,9 @@ namespace src {
 					RegionWidth             = width,
 					RegionHeight            = height
 				});
-	
-				
+
+				AddComponent(entity, new AiSpawnPoints());
+
 				//SetComponentEnabled<SpawnManyEntityData>(entity, false);
 			}
 		}

@@ -12,6 +12,7 @@ namespace src.systems {
 	public partial struct SpawnManyEntitySystem : ISystem {
 		[BurstCompile]
 		public void OnCreate(ref SystemState state) {
+			state.RequireForUpdate<AiSpawnPoints>();
 			state.RequireForUpdate<SpawnManyEntityData>();
 			state.RequireForUpdate<RandomNumGenData>();
 			state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
@@ -24,8 +25,9 @@ namespace src.systems {
 			var sysSing = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
 			var ecb     = sysSing.CreateCommandBuffer(state.WorldUnmanaged);
 
-			var spawnData = SystemAPI.GetSingleton<SpawnManyEntityData>();
-			var rndData   = SystemAPI.GetSingleton<RandomNumGenData>();
+			var spawnData      = SystemAPI.GetSingleton<SpawnManyEntityData>();
+			var spawnPointData = SystemAPI.GetSingleton<AiSpawnPoints>();
+			var rndData        = SystemAPI.GetSingleton<RandomNumGenData>();
 
 			var cellSize        = spawnData.SeparationRadius / math.SQRT2;
 			var width           = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
@@ -52,6 +54,8 @@ namespace src.systems {
 				Positions      = outputPositions.AsArray()
 			};
 
+			//spawnPointData.Positions = new NativeArray<float3>(outputPositions, Allocator.Persistent);
+			
 			// we can also write:  instantiationJob.ScheduleParallelByRef() -> same as below (source-gen)
 			var instantiateJobHandle = instantiationJob.ScheduleParallelByRef(state.Dependency);
 			instantiateJobHandle.Complete();

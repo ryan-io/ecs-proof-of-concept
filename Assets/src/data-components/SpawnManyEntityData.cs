@@ -1,9 +1,8 @@
 // src
 
 using Unity.Entities;
-using UnityEngine.Serialization;
 
-namespace src.systems {
+namespace src {
 	public struct SpawnManyEntityData : IComponentData {
 		public Entity Entity;
 		public int    Count;
