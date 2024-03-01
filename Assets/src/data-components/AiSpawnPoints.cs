@@ -2,7 +2,11 @@
 using Unity.Mathematics;
 
 namespace src {
+	public struct PositionsBlob {
+		public BlobArray<float3> Positions;
+	}
+	
 	public struct AiSpawnPoints : IComponentData {
-		public DynamicBuffer<float3> Positions;
+		public BlobAssetReference<PositionsBlob> Value;
 	}
 }

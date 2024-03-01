@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Profiling;
 using Unity.Transforms;
+using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
 namespace src.systems {
@@ -22,48 +23,81 @@ namespace src.systems {
 		public void OnUpdate(ref SystemState state) {
 			state.Enabled = false;
 
-			var sysSing = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-			var ecb     = sysSing.CreateCommandBuffer(state.WorldUnmanaged);
+				var sysSing = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+				var ecb     = sysSing.CreateCommandBuffer(state.WorldUnmanaged);
 
-			var spawnData      = SystemAPI.GetSingleton<SpawnManyEntityData>();
-			var spawnPointData = SystemAPI.GetSingleton<AiSpawnPoints>();
-			var rndData        = SystemAPI.GetSingleton<RandomNumGenData>();
+				var spawnData = SystemAPI.GetSingleton<SpawnManyEntityData>();
+				var rndData   = SystemAPI.GetSingleton<RandomNumGenData>();
 
-			var cellSize        = spawnData.SeparationRadius / math.SQRT2;
-			var width           = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
-			var height          = (int)math.ceil(spawnData.RegionHeight / cellSize) + 1;
-			var cellScalar      = (int)math.ceil(1 / cellSize);
-			var outputPositions = new NativeList<float3>(cellScalar * width * height, Allocator.Persistent);
+				var cellSize        = spawnData.SeparationRadius / math.SQRT2;
+				var width           = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
+				var height          = (int)math.ceil(spawnData.RegionHeight / cellSize) + 1;
+				var cellScalar      = (int)math.ceil(1 / cellSize);
+				var outputPositions = new NativeList<float3>(cellScalar * width * height, Allocator.Persistent);
 
-			var positionJob = new CalculateSpawnPositions {
-				FinalPositions          = outputPositions,
-				SpawnCount              = spawnData.Count,
-				Random                  = rndData.Value,
-				IterationsBeforeDiscard = spawnData.IterationsBeforeDiscard,
-				SeparationRadius        = spawnData.SeparationRadius,
-				CellSize                = cellSize,
-				Width                   = width,
-				Height                  = height
-			};
+				var positionJob = new CalculateSpawnPositions {
+					FinalPositions          = outputPositions,
+					SpawnCount              = spawnData.Count,
+					Random                  = rndData.Value,
+					IterationsBeforeDiscard = spawnData.IterationsBeforeDiscard,
+					SeparationRadius        = spawnData.SeparationRadius,
+					CellSize                = cellSize,
+					Width                   = width,
+					Height                  = height
+				};
 
-			var positionJobHandle = positionJob.Schedule();
-			positionJobHandle.Complete();
+				//var positionJobHandle = 
+					positionJob.Run();
+				//positionJobHandle.Complete();
 
-			var instantiationJob = new SpawnManyEntityJob {
-				ParallelWriter = ecb.AsParallelWriter(),
-				Positions      = outputPositions.AsArray()
-			};
+				var instantiationJob = new SpawnManyEntityJob {
+					ParallelWriter = ecb.AsParallelWriter(),
+					Positions      = outputPositions.AsArray()
+				};
 
-			//spawnPointData.Positions = new NativeArray<float3>(outputPositions, Allocator.Persistent);
-			
-			// we can also write:  instantiationJob.ScheduleParallelByRef() -> same as below (source-gen)
-			var instantiateJobHandle = instantiationJob.ScheduleParallelByRef(state.Dependency);
-			instantiateJobHandle.Complete();
-			state.Dependency = instantiateJobHandle;
-			outputPositions.Dispose();
+				// we can also write:  instantiationJob.ScheduleParallelByRef() -> same as below (source-gen)
+				var instantiateJobHandle = instantiationJob.ScheduleParallelByRef(state.Dependency);
+				instantiateJobHandle.Complete();
+
+				var setBlockJob = new SetPositionsBlobJob() {
+					Ecb       = ecb,
+					Positions = outputPositions,
+					Count     = spawnData.Count
+				};
+
+				var setBlockHandle = setBlockJob.Schedule(instantiateJobHandle);
+				setBlockHandle.Complete();
+				//SetPositionsBlob(ref spawnData, ref outputPositions, ref ecb, in e);
+				state.Dependency = instantiateJobHandle;
+
+				var test = SystemAPI.GetSingleton<AiSpawnPoints>();
+				outputPositions.Dispose();
 		}
 	}
 
+	[BurstCompile]
+	public partial struct SetPositionsBlobJob : IJobEntity {
+		public EntityCommandBuffer Ecb;
+		[ReadOnly] public NativeList<float3>  Positions;
+		[ReadOnly] public int                 Count;
+		
+		[BurstCompile]
+		void Execute(Entity e, AiSpawnPoints aiSpawnPoints) {
+			var     bBuilder     = new BlobBuilder(Allocator.Temp);
+			ref var pBlob        = ref bBuilder.ConstructRoot<PositionsBlob>();
+			var     arrayBuilder = bBuilder.Allocate(ref pBlob.Positions, Count);
+
+			for (var i = 0; i < Count; i++) {
+				arrayBuilder[i] = Positions[i];
+			}
+
+			var bAsset = bBuilder.CreateBlobAssetReference<PositionsBlob>(Allocator.Persistent);
+			Ecb.SetComponent(e, new AiSpawnPoints { Value = bAsset });
+			Debug.Log(bAsset.Value.Positions.Length);
+			bBuilder.Dispose();
+		}
+	}
+	
 	[BurstCompile]
 	public struct CalculateSpawnPositions : IJob {
 		public NativeList<float3> FinalPositions;
@@ -79,8 +113,8 @@ namespace src.systems {
 		public void Execute() {
 			// https: //sighack.com/post/poisson-disk-sampling-bridsons-algorithm
 
-			var grid            = new NativeArray<float3>(65356, Allocator.Temp);
-			var activeList      = new NativeList<float3>(65356, Allocator.Temp);
+			var grid       = new NativeArray<float3>(65356, Allocator.Temp);
+			var activeList = new NativeList<float3>(65356, Allocator.Temp);
 
 			var p0X = Random.NextFloat(Width);
 			var p0Y = Random.NextFloat(Height);
