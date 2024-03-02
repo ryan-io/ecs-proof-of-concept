@@ -1,6 +1,4 @@
-﻿using src.systems;
-using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -19,7 +17,7 @@ namespace src {
 				var width  = math.abs(authoring.RegionWidth);
 				var height = math.abs(authoring.RegionHeight);
   
-				AddComponent(entity, new SpawnManyEntityData {
+				AddComponent(entity, new SpawnManyEntityComponent {  
 					Count                   = authoring.SpawnCount,
 					Entity                  = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic),
 					IterationsBeforeDiscard = authoring.IterationsBeforeDiscard,
@@ -28,9 +26,8 @@ namespace src {
 					RegionHeight            = height
 				});
 
-				AddComponent(entity, new AiSpawnPoints());
-
-				//SetComponentEnabled<SpawnManyEntityData>(entity, false);
+				AddComponent(entity, new AiSpawnComponent());
+				//SetComponentEnabled<SpawnManyEntityComponent>(entity, false);
 			}
 		}
 	}

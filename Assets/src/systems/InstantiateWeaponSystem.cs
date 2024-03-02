@@ -8,7 +8,7 @@ namespace src.systems {
 	public partial struct InstantiateWeaponSystem : ISystem {
 		[BurstCompile]
 		public void OnCreate(ref SystemState state) {
-			state.RequireForUpdate<PlayerData>();
+			state.RequireForUpdate<PlayerComponent>();
 			state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
 		}
 
@@ -20,7 +20,7 @@ namespace src.systems {
 			var ecb          = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
 			foreach (var (weaponData, trAttachData) in
-			         SystemAPI.Query<RefRO<EquippableData>, RefRO<WeaponAttachmentData>>()) {
+			         SystemAPI.Query<RefRO<EquippableComponent>, RefRO<WeaponAttachmentComponent>>()) {
 				var e = ecb.Instantiate(weaponData.ValueRO.Prefab);
 
 				ecb.AddComponent(e, new Parent {

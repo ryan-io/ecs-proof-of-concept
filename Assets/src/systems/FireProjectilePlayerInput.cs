@@ -22,7 +22,7 @@ namespace src.systems {
 			         SystemAPI.Query<
 				         RefRO<LocalTransform>,
 				         RefRO<PlayerWeakAttackInputTag>,
-				         RefRO<ProjectileData>>()
+				         RefRO<ProjectileComponent>>()
 			                  .WithEntityAccess()) {
 				var e = ecb.Instantiate(projData.ValueRO.Prefab);
 

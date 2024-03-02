@@ -10,7 +10,7 @@ namespace src {
 			public override void Bake(EquippableAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
 				AddComponent(entity,
-					new EquippableData {
+					new EquippableComponent {
 						Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic)
 					});
 			}

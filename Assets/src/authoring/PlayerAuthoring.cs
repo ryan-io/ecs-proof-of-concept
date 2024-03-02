@@ -4,13 +4,18 @@ using UnityEngine;
 namespace src {
 	public class PlayerAuthoring : MonoBehaviour {
 		[field: SerializeField] public float InitialMovementSpeed { get; private set; } = 1.0f;
+		[field: SerializeField] public float InitialHealth { get; private set; } = 10.0f;
 		
 		public class PlayerAuthoringBaker : Baker<PlayerAuthoring> {
 			public override void Bake(PlayerAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-				AddComponent(entity, new PlayerData());
-				AddComponent(entity, new MovementModifierData {Speed = authoring.InitialMovementSpeed} );
+				AddComponent(entity, new PlayerComponent {
+					Entity =  entity,
+					Health = authoring.InitialHealth
+				});
+				
+				AddComponent(entity, new MovementModifierComponent {Speed = authoring.InitialMovementSpeed} );
 			}
 		}
 	}

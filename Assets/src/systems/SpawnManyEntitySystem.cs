@@ -5,7 +5,6 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Profiling;
 using Unity.Transforms;
-using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
 namespace src.systems {
@@ -13,8 +12,8 @@ namespace src.systems {
 	public partial struct SpawnManyEntitySystem : ISystem {
 		[BurstCompile]
 		public void OnCreate(ref SystemState state) {
-			state.RequireForUpdate<AiSpawnPoints>();
-			state.RequireForUpdate<SpawnManyEntityData>();
+			state.RequireForUpdate<AiSpawnComponent>();
+			state.RequireForUpdate<SpawnManyEntityComponent>();
 			state.RequireForUpdate<RandomNumGenData>();
 			state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
 		}
@@ -22,11 +21,10 @@ namespace src.systems {
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state) {
 			state.Enabled = false;
-
 				var sysSing = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
 				var ecb     = sysSing.CreateCommandBuffer(state.WorldUnmanaged);
 
-				var spawnData = SystemAPI.GetSingleton<SpawnManyEntityData>();
+				var spawnData = SystemAPI.GetSingleton<SpawnManyEntityComponent>();
 				var rndData   = SystemAPI.GetSingleton<RandomNumGenData>();
 
 				var cellSize        = spawnData.SeparationRadius / math.SQRT2;
@@ -47,8 +45,8 @@ namespace src.systems {
 				};
 
 				//var positionJobHandle = 
-					positionJob.Run();
-				//positionJobHandle.Complete();
+					var positionJobHandle = positionJob.Schedule();
+				positionJobHandle.Complete();
 
 				var instantiationJob = new SpawnManyEntityJob {
 					ParallelWriter = ecb.AsParallelWriter(),
@@ -56,7 +54,7 @@ namespace src.systems {
 				};
 
 				// we can also write:  instantiationJob.ScheduleParallelByRef() -> same as below (source-gen)
-				var instantiateJobHandle = instantiationJob.ScheduleParallelByRef(state.Dependency);
+				var instantiateJobHandle = instantiationJob.Schedule(positionJobHandle);
 				instantiateJobHandle.Complete();
 
 				var setBlockJob = new SetPositionsBlobJob() {
@@ -67,10 +65,7 @@ namespace src.systems {
 
 				var setBlockHandle = setBlockJob.Schedule(instantiateJobHandle);
 				setBlockHandle.Complete();
-				//SetPositionsBlob(ref spawnData, ref outputPositions, ref ecb, in e);
 				state.Dependency = instantiateJobHandle;
-
-				var test = SystemAPI.GetSingleton<AiSpawnPoints>();
 				outputPositions.Dispose();
 		}
 	}
@@ -82,7 +77,10 @@ namespace src.systems {
 		[ReadOnly] public int                 Count;
 		
 		[BurstCompile]
-		void Execute(Entity e, AiSpawnPoints aiSpawnPoints) {
+		void Execute(Aspects.AiSpawnPointsAspect aspect) {
+			if (Positions.Length < 1)
+				return;
+			
 			var     bBuilder     = new BlobBuilder(Allocator.Temp);
 			ref var pBlob        = ref bBuilder.ConstructRoot<PositionsBlob>();
 			var     arrayBuilder = bBuilder.Allocate(ref pBlob.Positions, Count);
@@ -90,10 +88,11 @@ namespace src.systems {
 			for (var i = 0; i < Count; i++) {
 				arrayBuilder[i] = Positions[i];
 			}
-
+			
 			var bAsset = bBuilder.CreateBlobAssetReference<PositionsBlob>(Allocator.Persistent);
-			Ecb.SetComponent(e, new AiSpawnPoints { Value = bAsset });
-			Debug.Log(bAsset.Value.Positions.Length);
+			//Ecb.SetComponent(aspect.Self, new AiSpawnPoints { Value = bAsset });
+			aspect.SetPositions(bAsset);
+
 			bBuilder.Dispose();
 		}
 	}
@@ -208,13 +207,13 @@ namespace src.systems {
 		[ReadOnly] public NativeArray<float3>                Positions;
 
 		[BurstCompile]
-		public void Execute([ChunkIndexInQuery] int chunkIndex, ref SpawnManyEntityData data) {
+		public void Execute([ChunkIndexInQuery] int chunkIndex, ref SpawnManyEntityComponent component) {
 			s_preparePerfMarker.Begin();
 
 			// Allocator.Temp is automatically disposed
 			var instances = new NativeArray<Entity>(Positions.Length, Allocator.Temp);
 
-			ParallelWriter.Instantiate(chunkIndex, data.Entity, instances);
+			ParallelWriter.Instantiate(chunkIndex, component.Entity, instances);
 
 			for (int i = 0; i < Positions.Length; i++) {
 				ParallelWriter.SetComponent(chunkIndex, instances[i], new LocalTransform {

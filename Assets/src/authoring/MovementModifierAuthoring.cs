@@ -8,7 +8,7 @@ namespace src {
 		public class MovementModifierAuthoringBaker : Baker<MovementModifierAuthoring> {
 			public override void Bake(MovementModifierAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
-				AddComponent(entity, new MovementModifierData { Speed = authoring.Penalty });
+				AddComponent(entity, new MovementModifierComponent { Speed = authoring.Penalty });
 			}
 		}
 	}

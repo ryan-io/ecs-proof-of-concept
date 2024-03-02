@@ -13,7 +13,7 @@ namespace src {
 			public override void Bake(WeaponAttachmentAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
 				AddComponent(entity,
-					new WeaponAttachmentData {
+					new WeaponAttachmentComponent {
 						Pivot  = GetEntity(authoring.Pivot, TransformUsageFlags.Dynamic), 
 						Offset = authoring.Offset
 					});

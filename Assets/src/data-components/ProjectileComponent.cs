@@ -3,7 +3,7 @@
 using Unity.Entities;
 
 namespace src {
-	public struct ProjectileData : IComponentData {
+	public struct ProjectileComponent : IComponentData {
 		public Entity Prefab;
 	}
 }

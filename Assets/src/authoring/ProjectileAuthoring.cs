@@ -8,7 +8,7 @@ namespace src {
 		public class ProjectileAuthoringBaker : Baker<ProjectileAuthoring> {
 			public override void Bake(ProjectileAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
-				AddComponent(entity, new ProjectileData {
+				AddComponent(entity, new ProjectileComponent {
 					Prefab = GetEntity(authoring.Prefab, TransformUsageFlags.Dynamic)
 				});
 			}

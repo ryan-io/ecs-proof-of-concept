@@ -6,8 +6,8 @@ namespace src.systems {
 	[UpdateInGroup(typeof(InitializationSystemGroup), OrderLast = true)]
 	public partial class InputListenerSystem : SystemBase {
 		protected override void OnCreate() {
-			RequireForUpdate<InputData>();
-			RequireForUpdate<PlayerData>();
+			RequireForUpdate<InputComponent>();
+			RequireForUpdate<PlayerComponent>();
 
 			m_input = new ControlInput();
 		}
@@ -17,12 +17,12 @@ namespace src.systems {
 			
 			
 			
-			var data   = new InputData { Directional = directionalValues };
+			var data   = new InputComponent { Directional = directionalValues };
 			SystemAPI.SetSingleton(data);
 		}
 
 		protected override void OnStartRunning() {
-			m_player = SystemAPI.GetSingletonEntity<PlayerData>();
+			m_player = SystemAPI.GetSingletonEntity<PlayerComponent>();
 			m_input.Enable();
 
 			m_input.CoreMap.WeakAttack.performed   += OnWeakAttackPerformed;

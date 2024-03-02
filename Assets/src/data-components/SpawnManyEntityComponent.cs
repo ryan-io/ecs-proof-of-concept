@@ -3,7 +3,7 @@
 using Unity.Entities;
 
 namespace src {
-	public struct SpawnManyEntityData : IComponentData {
+	public struct SpawnManyEntityComponent : IComponentData {
 		public Entity Entity;
 		public int    Count;
 		public int    IterationsBeforeDiscard;

@@ -8,8 +8,8 @@ namespace src.systems {
 	public partial struct TranslateByInputSystem : ISystem {
 		[BurstCompile]
 		public void OnCreate(ref SystemState state) {
-			state.RequireForUpdate<InputData>();
-			state.RequireForUpdate<MovementModifierData>();
+			state.RequireForUpdate<InputComponent>();
+			state.RequireForUpdate<MovementModifierComponent>();
 		}
 
 		[BurstCompile]
@@ -28,8 +28,8 @@ namespace src.systems {
 			m_transform.ValueRW.Position.xy += dir * dT * m_movement.ValueRO.Speed;
 		}
 
-		readonly RefRO<InputData>            m_input;
-		readonly RefRO<MovementModifierData> m_movement;
+		readonly RefRO<InputComponent>            m_input;
+		readonly RefRO<MovementModifierComponent> m_movement;
 		readonly RefRW<LocalTransform>       m_transform;
 	}
 }

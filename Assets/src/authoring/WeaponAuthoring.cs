@@ -13,13 +13,13 @@ namespace src {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
 
 				AddComponent(entity,
-					new WeaponData {
+					new WeaponComponent {
 						DamageMin = authoring.DamageMin,
 						DamageMax = authoring.DamageMax,
 						Speed     = authoring.Speed,
 					});
 
-				AddComponent(entity, new MovementModifierData() {
+				AddComponent(entity, new MovementModifierComponent() {
 					Speed = authoring.MovementPenalty
 				});
 			}

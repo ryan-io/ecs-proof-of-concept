@@ -3,7 +3,7 @@
 using Unity.Entities;
 
 namespace src {
-	public struct MovementModifierData : IComponentData {
+	public struct MovementModifierComponent : IComponentData {
 		public float Speed;
 	}
 }

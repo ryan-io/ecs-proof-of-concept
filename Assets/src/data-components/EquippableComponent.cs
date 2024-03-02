@@ -1,7 +1,7 @@
 using Unity.Entities;
 
 namespace src {
-	public struct EquippableData : IComponentData {
+	public struct EquippableComponent : IComponentData {
 		public Entity Prefab;
 	}
 }
