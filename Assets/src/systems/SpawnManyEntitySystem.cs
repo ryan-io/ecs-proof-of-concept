@@ -9,6 +9,7 @@ using Random = Unity.Mathematics.Random;
 
 namespace src.systems {
 	[BurstCompile]
+	[UpdateInGroup(typeof(InitializationSystemGroup))]
 	public partial struct SpawnManyEntitySystem : ISystem {
 		[BurstCompile]
 		public void OnCreate(ref SystemState state) {
@@ -21,82 +22,77 @@ namespace src.systems {
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state) {
 			state.Enabled = false;
-				var sysSing = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-				var ecb     = sysSing.CreateCommandBuffer(state.WorldUnmanaged);
+			var sysSing = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+			var ecb     = sysSing.CreateCommandBuffer(state.WorldUnmanaged);
 
-				var spawnData = SystemAPI.GetSingleton<SpawnManyEntityComponent>();
-				var rndData   = SystemAPI.GetSingleton<RandomNumGenData>();
+			var spawnData = SystemAPI.GetSingleton<SpawnManyEntityComponent>();
+			var rndData   = SystemAPI.GetSingleton<RandomNumGenData>();
 
-				var cellSize        = spawnData.SeparationRadius / math.SQRT2;
-				var width           = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
-				var height          = (int)math.ceil(spawnData.RegionHeight / cellSize) + 1;
-				var cellScalar      = (int)math.ceil(1 / cellSize);
-				var outputPositions = new NativeList<float3>(cellScalar * width * height, Allocator.Persistent);
+			var cellSize        = spawnData.SeparationRadius / math.SQRT2;
+			var width           = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
+			var height          = (int)math.ceil(spawnData.RegionHeight / cellSize) + 1;
+			var cellScalar      = (int)math.ceil(1 / cellSize);
+			var outputPositions = new NativeList<float3>(cellScalar * width * height, Allocator.Persistent);
 
-				var positionJob = new CalculateSpawnPositions {
-					FinalPositions          = outputPositions,
-					SpawnCount              = spawnData.Count,
-					Random                  = rndData.Value,
-					IterationsBeforeDiscard = spawnData.IterationsBeforeDiscard,
-					SeparationRadius        = spawnData.SeparationRadius,
-					CellSize                = cellSize,
-					Width                   = width,
-					Height                  = height
-				};
+			var positionJob = new CalculateSpawnPositions {
+				FinalPositions          = outputPositions,
+				SpawnCount              = spawnData.Count - 1,
+				Random                  = rndData.Value,
+				IterationsBeforeDiscard = spawnData.IterationsBeforeDiscard,
+				SeparationRadius        = spawnData.SeparationRadius,
+				CellSize                = cellSize,
+				Width                   = width,
+				Height                  = height
+			};
 
-				//var positionJobHandle = 
-					var positionJobHandle = positionJob.Schedule();
-				positionJobHandle.Complete();
+			//var positionJobHandle = 
+			var positionJobHandle = positionJob.Schedule();
+			positionJobHandle.Complete();
 
-				var instantiationJob = new SpawnManyEntityJob {
-					ParallelWriter = ecb.AsParallelWriter(),
-					Positions      = outputPositions.AsArray()
-				};
+			var instantiationJob = new SpawnManyEntityJob {
+				ParallelWriter = ecb.AsParallelWriter(),
+				Positions      = outputPositions.AsArray()
+			};
 
-				// we can also write:  instantiationJob.ScheduleParallelByRef() -> same as below (source-gen)
-				var instantiateJobHandle = instantiationJob.Schedule(positionJobHandle);
-				instantiateJobHandle.Complete();
+			// we can also write:  instantiationJob.ScheduleParallelByRef() -> same as below (source-gen)
+			var instantiateJobHandle = instantiationJob.Schedule(positionJobHandle);
+			instantiateJobHandle.Complete();
 
-				var setBlockJob = new SetPositionsBlobJob() {
-					Ecb       = ecb,
-					Positions = outputPositions,
-					Count     = spawnData.Count
-				};
+			var setBlockJob = new SetPositionsBlobJob() {
+				Positions = outputPositions,
+			};
 
-				var setBlockHandle = setBlockJob.Schedule(instantiateJobHandle);
-				setBlockHandle.Complete();
-				state.Dependency = instantiateJobHandle;
-				outputPositions.Dispose();
+			var setBlockHandle = setBlockJob.Schedule(instantiateJobHandle);
+			setBlockHandle.Complete();
+			state.Dependency = instantiateJobHandle;
+			outputPositions.Dispose();
 		}
 	}
 
 	[BurstCompile]
 	public partial struct SetPositionsBlobJob : IJobEntity {
-		public EntityCommandBuffer Ecb;
 		[ReadOnly] public NativeList<float3>  Positions;
-		[ReadOnly] public int                 Count;
-		
+
 		[BurstCompile]
 		void Execute(Aspects.AiSpawnPointsAspect aspect) {
 			if (Positions.Length < 1)
 				return;
-			
+
 			var     bBuilder     = new BlobBuilder(Allocator.Temp);
 			ref var pBlob        = ref bBuilder.ConstructRoot<PositionsBlob>();
-			var     arrayBuilder = bBuilder.Allocate(ref pBlob.Positions, Count);
+			var     arrayBuilder = bBuilder.Allocate(ref pBlob.Positions, Positions.Length);
 
-			for (var i = 0; i < Count; i++) {
+			for (var i = 0; i < Positions.Length; i++) {
 				arrayBuilder[i] = Positions[i];
 			}
-			
+
 			var bAsset = bBuilder.CreateBlobAssetReference<PositionsBlob>(Allocator.Persistent);
-			//Ecb.SetComponent(aspect.Self, new AiSpawnPoints { Value = bAsset });
 			aspect.SetPositions(bAsset);
 
 			bBuilder.Dispose();
 		}
 	}
-	
+
 	[BurstCompile]
 	public struct CalculateSpawnPositions : IJob {
 		public NativeList<float3> FinalPositions;
@@ -124,7 +120,7 @@ namespace src.systems {
 
 			int counter = 0;
 
-			do {
+			while (counter < SpawnCount) {
 				counter++;
 				var index   = Random.NextInt(activeList.Length - 1);
 				var point   = activeList[index];
@@ -153,7 +149,7 @@ namespace src.systems {
 					activeList.RemoveAt(index);
 					activeList.SetCapacity(activeList.Length);
 				}
-			} while (counter < SpawnCount);
+			}
 
 			grid.Dispose();
 			activeList.Dispose();
@@ -203,8 +199,8 @@ namespace src.systems {
 
 	[BurstCompile]
 	public partial struct SpawnManyEntityJob : IJobEntity {
-		public            EntityCommandBuffer.ParallelWriter ParallelWriter;
-		[ReadOnly] public NativeArray<float3>                Positions;
+		public                              EntityCommandBuffer.ParallelWriter ParallelWriter;
+		[Unity.Collections.ReadOnly] public NativeArray<float3>                Positions;
 
 		[BurstCompile]
 		public void Execute([ChunkIndexInQuery] int chunkIndex, ref SpawnManyEntityComponent component) {
