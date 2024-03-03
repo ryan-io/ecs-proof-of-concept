@@ -6,6 +6,8 @@ namespace src {
 		public class LookAtPlayerAuthoringBaker : Baker<AiAuthoring> {
 			public override void Bake(AiAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
+				
+				AddComponent(entity, new AiTelemetry());
 			}
 		}
 	}

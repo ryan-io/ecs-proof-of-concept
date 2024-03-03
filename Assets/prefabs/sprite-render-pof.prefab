@@ -56,6 +56,7 @@ GameObject:
   - component: {fileID: 5670168737921480842}
   - component: {fileID: 4772189602985376205}
   - component: {fileID: 8726344104206346456}
+  - component: {fileID: 1099319755567335175}
   m_Layer: 0
   m_Name: rendering
   m_TagString: Untagged
@@ -130,3 +131,43 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <ShouldLookAtPlayer>k__BackingField: 1
+--- !u!114 &1099319755567335175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9131166833653141033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be769d94253e895418ce7434194ba34e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AnimationAuthoringModule:
+    AnimationSet: {fileID: 0}
+    InitialAnimationIndex: 0
+  RegisterSpriteData:
+    SpriteRenderData:
+      Material: {fileID: 0}
+      PropertiesSet: {fileID: 0}
+  RenderSettings:
+    Pivot:
+      x: 0.5
+      y: 0.5
+    Size:
+      x: 1
+      y: 1
+    LockSize: 0
+    DrawMode: 0
+    TilingAndOffset:
+      x: 1
+      y: 1
+      z: 0
+      w: 0
+    Flip:
+      x: 0
+      y: 0
+  Sorting:
+    StaticSorting: 0
+    SortingIndex: 0
+    SortingLayer: 0

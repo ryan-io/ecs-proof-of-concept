@@ -12,7 +12,7 @@ namespace src {
 
 				AddComponent(entity, new PlayerComponent {
 					Entity =  entity,
-					Health = authoring.InitialHealth
+				//	Health = authoring.InitialHealth
 				});
 				
 				AddComponent(entity, new MovementModifierComponent {Speed = authoring.InitialMovementSpeed} );
