@@ -1,7 +1,6 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace src.systems {
@@ -14,9 +13,11 @@ namespace src.systems {
 	}
 
 	public struct JetpackSystemQueryComponent : IComponentData {
+
 		public EntityQuery JetpackQuery;
 	}
 
+	[BurstCompile]
 	public partial struct MoveAiSystem : ISystem {
 		public void OnCreate(ref SystemState state) {
 			state.RequireForUpdate<PlayerComponent>();
@@ -30,6 +31,7 @@ namespace src.systems {
 			queryBuilder.Dispose();
 		}
 
+		[BurstCompile]
 		static void BuildQueryWalk(ref SystemState state, ref EntityQueryBuilder builder) {
 			builder = new EntityQueryBuilder(Allocator.Temp)
 			         .WithAspect<MoveAspect>()
@@ -38,11 +40,13 @@ namespace src.systems {
 			var systemDataWalk = new WalkSystemQueryComponent {
 				WalkQuery = state.GetEntityQuery(builder)
 			};
-			_ = state.EntityManager.AddComponentData(state.SystemHandle, systemDataWalk);
+			
+			state.EntityManager.AddComponentData(state.SystemHandle, systemDataWalk);
 
 			builder.Reset();
 		}
 
+		[BurstCompile]
 		static void BuildQueryRun(ref SystemState state, ref EntityQueryBuilder builder) {
 			builder = new EntityQueryBuilder(Allocator.Temp)
 			         .WithAspect<MoveAspect>()
@@ -51,11 +55,13 @@ namespace src.systems {
 			var systemDataRun = new RunSystemQueryComponent {
 				RunQuery = state.GetEntityQuery(builder)
 			};
-			_ = state.EntityManager.AddComponentData(state.SystemHandle, systemDataRun);
+			
+			state.EntityManager.AddComponentData(state.SystemHandle, systemDataRun);
 
 			builder.Reset();
 		}
 
+		[BurstCompile]
 		static void BuildQueryJetpack(ref SystemState state, ref EntityQueryBuilder builder) {
 			builder = new EntityQueryBuilder(Allocator.Temp)
 			         .WithAspect<MoveAspect>()
@@ -64,16 +70,20 @@ namespace src.systems {
 			var systemDataRun = new JetpackSystemQueryComponent {
 				JetpackQuery = state.GetEntityQuery(builder)
 			};
-			_ = state.EntityManager.AddComponentData(state.SystemHandle, systemDataRun);
+			
+			state.EntityManager.AddComponentData(state.SystemHandle, systemDataRun);
 
 			builder.Reset();
 		}
 
+		[BurstCompile]
 		public void OnUpdate(ref SystemState state) {
 			var systemDataRun     = SystemAPI.GetComponent<RunSystemQueryComponent>(state.SystemHandle);
 			var systemDataWalk    = SystemAPI.GetComponent<WalkSystemQueryComponent>(state.SystemHandle);
 			var systemDataJetpack = SystemAPI.GetComponent<JetpackSystemQueryComponent>(state.SystemHandle);
 
+			var deltaTime = SystemAPI.Time.DeltaTime;
+            
 			if (!systemDataJetpack.JetpackQuery.IsEmpty) {
 				var job    = new MoveJob();
 				var handle = job.ScheduleParallel(systemDataJetpack.JetpackQuery, state.Dependency);
@@ -87,7 +97,10 @@ namespace src.systems {
 				Debug.Log("We can run");
 			}
 			else if (!systemDataWalk.WalkQuery.IsEmpty) {
-				var job    = new MoveJob();
+				var job    = new MoveJob {
+					DeltaTime = deltaTime,
+					MoveSpeed = 0.1f
+				};
 				var handle = job.ScheduleParallel(systemDataWalk.WalkQuery, state.Dependency);
 				handle.Complete();
 				Debug.Log("We can walk");
@@ -95,16 +108,19 @@ namespace src.systems {
 		}
 	}
 
+	[BurstCompile]
 	public partial struct MoveJob : IJobEntity {
 		public float MoveSpeed;
+		public float DeltaTime;
 
+		[BurstCompile]
 		public void Execute(MoveAspect move) {
 			if (!move.IsInHostileRange()) {
 				// stop/return to original location
 				Debug.Log("Not currently in range");
 			}
 			else {
-				// move towards player entity
+				move.MoveTowardsPlayer(MoveSpeed, DeltaTime);
 				Debug.Log("In range!");
 			}
 		}

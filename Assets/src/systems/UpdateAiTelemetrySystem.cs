@@ -43,7 +43,8 @@ namespace src.systems {
 		[BurstCompile]
 		public void Execute(AiTelemetryAspect telemetry) {
 			var sqDist  = math.distancesq(AiPosition, PlayerPosition);
-			var heading =  math.normalizesafe(AiPosition - PlayerPosition);
+			var heading =  math.normalizesafe(PlayerPosition - AiPosition);
+			heading = new float3(heading.x, heading.y, 0);
 			
 			telemetry.SetTelemetryHeading(heading);
 			telemetry.SetTelemtrySqDistToPlayer(sqDist);
