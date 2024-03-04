@@ -28,11 +28,11 @@ namespace src.systems {
 			var spawnData = SystemAPI.GetSingleton<SpawnManyEntityComponent>();
 			var rndData   = SystemAPI.GetSingleton<RandomNumGenData>();
 
-			var cellSize        = spawnData.SeparationRadius / math.SQRT2;
-			var width           = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
-			var height          = (int)math.ceil(spawnData.RegionHeight / cellSize) + 1;
-			var cellScalar      = (int)math.ceil(1 / cellSize);
-			var outputPositions = new NativeList<float3>(cellScalar * width * height, Allocator.Persistent);
+			var cellSize = spawnData.SeparationRadius / math.SQRT2;
+			var width    = (int)math.ceil(spawnData.RegionWidth  / cellSize) + 1;
+			var height   = (int)math.ceil(spawnData.RegionHeight / cellSize) + 1;
+
+			var outputPositions = new NativeList<float3>(spawnData.Count - 1, Allocator.Persistent);
 
 			var positionJob = new CalculateSpawnPositions {
 				FinalPositions          = outputPositions,
@@ -71,7 +71,7 @@ namespace src.systems {
 
 	[BurstCompile]
 	public partial struct SetPositionsBlobJob : IJobEntity {
-		[ReadOnly] public NativeList<float3>  Positions;
+		[ReadOnly] public NativeList<float3> Positions;
 
 		[BurstCompile]
 		void Execute(Aspects.AiSpawnPointsAspect aspect) {
@@ -108,13 +108,13 @@ namespace src.systems {
 		public void Execute() {
 			// https: //sighack.com/post/poisson-disk-sampling-bridsons-algorithm
 
-			var grid       = new NativeArray<float3>(65356, Allocator.Temp);
-			var activeList = new NativeList<float3>(65356, Allocator.Temp);
+			var grid       = new NativeArray<float3>(65565, Allocator.Temp);
+			var activeList = new NativeList<float3>(65565, Allocator.Temp);
 
-			var p0X = Random.NextFloat(Width);
-			var p0Y = Random.NextFloat(Height);
+			var p0X = Random.NextFloat(Height);
+			var p0Y = Random.NextFloat(Width);
 			var p0  = new float3(p0X, p0Y, 0);
-			Insert(ref grid, Width, CellSize, p0);
+			Insert(ref grid, Height, CellSize, p0);
 			FinalPositions.Add(p0);
 			activeList.Add(p0);
 
@@ -131,11 +131,11 @@ namespace src.systems {
 					var randomRadius = Random.NextFloat(SeparationRadius, 2 * SeparationRadius);
 
 					var coordX = point.x + randomRadius * math.cos(angle);
-					var coordY = point.x + randomRadius * math.sin(angle);
+					var coordY = point.y + randomRadius * math.sin(angle);
 
 					var testPoint = new float3(coordX, coordY, 0);
 
-					if (!IsValid(ref grid, Width, Width, Height, testPoint, SeparationRadius, CellSize))
+					if (!IsValid(ref grid, Height, Width, Height, testPoint, SeparationRadius, CellSize))
 						continue;
 
 					FinalPositions.Add(testPoint);
@@ -156,36 +156,36 @@ namespace src.systems {
 		}
 
 		[BurstCompile]
-		void Insert(ref NativeArray<float3> grid, int numOfCol, float cellSize, float3 worldPoint) {
+		void Insert(ref NativeArray<float3> grid, int height, float cellSize, float3 worldPoint) {
 			int rowIndex    = (int)math.floor(worldPoint.x / cellSize); // x
 			int colIndex    = (int)math.floor(worldPoint.y / cellSize); // y
-			int insertIndex = rowIndex * numOfCol + colIndex;
+			int insertIndex = colIndex + height * rowIndex;
 			grid[insertIndex] = worldPoint;
 		}
 
 		[BurstCompile]
-		float3 Get(ref NativeArray<float3> grid, int numOfCol, int rowIndex, int colIndex) {
-			int insertIndex = rowIndex + numOfCol * colIndex;
+		float3 Get(ref NativeArray<float3> grid, int numOfRow, int rowIndex, int colIndex) {
+			int insertIndex = colIndex + numOfRow * rowIndex;
 			return grid[insertIndex];
 		}
 
 		[BurstCompile]
-		bool IsValid(ref NativeArray<float3> grid, int numOfCol, int width, int height, float3 point, float radius,
+		bool IsValid(ref NativeArray<float3> grid, int gridHeight, int width, int height, float3 point, float radius,
 			float
 				cellSize) {
-			if (point.x < 0 || point.y < 0 || point.x >= width || point.y >= height)
+			if (point.x < 0 || point.y < 0 || point.x >= height || point.y >= width)
 				return false;
 
 			int xCheck = (int)math.floor(point.x / cellSize);
 			int yCheck = (int)math.floor(point.y / cellSize);
 			int xLower = math.max(xCheck - 1, 0);
-			int xUpper = math.max(xCheck + 1, width - 1);
+			int xUpper = math.max(xCheck + 1, height - 1);
 			int yLower = math.max(yCheck - 1, 0);
-			int yUpper = math.max(xCheck + 1, height - 1);
+			int yUpper = math.max(yCheck + 1, width - 1);
 
 			for (var row = xLower; row <= xUpper; row++) {
 				for (var col = yLower; col <= yUpper; col++) {
-					var value  = Get(ref grid, numOfCol, row, col);
+					var value  = Get(ref grid, gridHeight, row, col);
 					var sqDist = math.distancesq(point, value);
 
 					if (sqDist < radius * radius)
@@ -200,7 +200,7 @@ namespace src.systems {
 	[BurstCompile]
 	public partial struct SpawnManyEntityJob : IJobEntity {
 		public                              EntityCommandBuffer.ParallelWriter ParallelWriter;
-		[Unity.Collections.ReadOnly] public NativeArray<float3>                Positions;
+		[ReadOnly] public NativeArray<float3>                Positions;
 
 		[BurstCompile]
 		public void Execute([ChunkIndexInQuery] int chunkIndex, ref SpawnManyEntityComponent component) {

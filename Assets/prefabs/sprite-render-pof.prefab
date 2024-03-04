@@ -45,7 +45,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e02b696da19f4aec872694cfae537901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <CanMove>k__BackingField: 1
+  <CanMove>k__BackingField: 0
+  <CanWalk>k__BackingField: 1
+  <WalkSpeed>k__BackingField: 1
+  <CanRun>k__BackingField: 1
+  <RunSpeed>k__BackingField: 2
+  <RunStoppingDistance>k__BackingField: 0.25
+  <CanJetpack>k__BackingField: 1
+  <JetpackThrustMax>k__BackingField: 1
+  <JetpackLiftMax>k__BackingField: 1
+  <JetpackHoverHeight>k__BackingField: 1
   <IsHostile>k__BackingField: 1
   <DistanceBeforeHostileSq>k__BackingField: 100
 --- !u!1 &9131166833653141033

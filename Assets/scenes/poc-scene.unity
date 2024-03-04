@@ -215,10 +215,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Prefab>k__BackingField: {fileID: 3244774611535040894, guid: a0505c8ca56435f448ef36f7ffdabfb3, type: 3}
   <SpawnCount>k__BackingField: 100
-  <SeparationRadius>k__BackingField: 1
-  <IterationsBeforeDiscard>k__BackingField: 30
-  <RegionWidth>k__BackingField: 25
-  <RegionHeight>k__BackingField: 25
+  <SeparationRadius>k__BackingField: 0.89
+  <IterationsBeforeDiscard>k__BackingField: 60
+  <RegionWidth>k__BackingField: 2
+  <RegionHeight>k__BackingField: 10
 --- !u!4 &1238299247
 Transform:
   m_ObjectHideFlags: 0
