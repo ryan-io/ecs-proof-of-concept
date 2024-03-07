@@ -156,16 +156,16 @@ namespace src.systems {
 		}
 
 		[BurstCompile]
-		void Insert(ref NativeArray<float3> grid, int height, float cellSize, float3 worldPoint) {
+		void Insert(ref NativeArray<float3> grid, int gridHeight, float cellSize, float3 worldPoint) {
 			int rowIndex    = (int)math.floor(worldPoint.x / cellSize); // x
 			int colIndex    = (int)math.floor(worldPoint.y / cellSize); // y
-			int insertIndex = colIndex + height * rowIndex;
+			int insertIndex = colIndex + gridHeight * rowIndex;
 			grid[insertIndex] = worldPoint;
 		}
 
 		[BurstCompile]
-		float3 Get(ref NativeArray<float3> grid, int numOfRow, int rowIndex, int colIndex) {
-			int insertIndex = colIndex + numOfRow * rowIndex;
+		float3 Get(ref NativeArray<float3> grid, int gridHeight, int rowIndex, int colIndex) {
+			int insertIndex = colIndex + gridHeight * rowIndex;
 			return grid[insertIndex];
 		}
 
