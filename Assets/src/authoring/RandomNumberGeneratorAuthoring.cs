@@ -1,5 +1,4 @@
-﻿using src.systems;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
@@ -8,6 +7,8 @@ namespace src {
 		public class RandomNumGenAuthoringBaker : Baker<RandomNumGenAuthoring> {
 			public override void Bake(RandomNumGenAuthoring authoring) {
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
+				AddBuffer<Position2DBuffer>(entity);
+				
 				AddComponent(entity, new RandomNumGenData {
 					Value = Random.CreateFromIndex((uint)System.DateTime.Now.Millisecond)
 				});

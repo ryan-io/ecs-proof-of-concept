@@ -14,10 +14,7 @@ namespace src.systems {
 
 		protected override void OnUpdate() {
 			var directionalValues = m_input.CoreMap.Movement.ReadValue<Vector2>();
-			
-			
-			
-			var data   = new InputComponent { Directional = directionalValues };
+			var data              = new InputComponent { Directional = directionalValues };
 			SystemAPI.SetSingleton(data);
 		}
 
@@ -28,11 +25,11 @@ namespace src.systems {
 			m_input.CoreMap.WeakAttack.performed   += OnWeakAttackPerformed;
 			m_input.CoreMap.StrongAttack.performed += OnStrongAttackPerformed;
 			m_input.CoreMap.Dodge.performed        += OnDodgePerformed;
-		}  
+		}
 
 		protected override void OnStopRunning() {
 			m_input.Disable();
-			
+
 			m_input.CoreMap.WeakAttack.performed   -= OnWeakAttackPerformed;
 			m_input.CoreMap.StrongAttack.performed -= OnStrongAttackPerformed;
 			m_input.CoreMap.Dodge.performed        -= OnDodgePerformed;
@@ -41,16 +38,16 @@ namespace src.systems {
 		void OnWeakAttackPerformed(InputAction.CallbackContext ctx) {
 			SystemAPI.SetComponentEnabled<PlayerWeakAttackInputTag>(m_player, true);
 		}
-		
+
 		void OnStrongAttackPerformed(InputAction.CallbackContext ctx) {
 			SystemAPI.SetComponentEnabled<PlayerStrongAttackInputTag>(m_player, true);
 		}
-		
+
 		void OnDodgePerformed(InputAction.CallbackContext ctx) {
 			SystemAPI.SetComponentEnabled<PlayerDodgeInputTag>(m_player, true);
 		}
-		
+
 		ControlInput m_input;
-		Entity      m_player;
+		Entity       m_player;
 	}
 }

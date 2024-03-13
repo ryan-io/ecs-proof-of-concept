@@ -90,6 +90,7 @@ namespace src.systems {
 			aspect.SetPositions(bAsset);
 
 			bBuilder.Dispose();
+			bAsset.Dispose();
 		}
 	}
 
