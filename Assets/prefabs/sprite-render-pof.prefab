@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e02b696da19f4aec872694cfae537901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <CanMove>k__BackingField: 0
+  <CanMove>k__BackingField: 1
   <CanWalk>k__BackingField: 1
   <WalkSpeed>k__BackingField: 1
   <CanRun>k__BackingField: 1

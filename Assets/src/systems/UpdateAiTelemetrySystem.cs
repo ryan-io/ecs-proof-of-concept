@@ -17,12 +17,9 @@ namespace src.systems {
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state) {
 			var playerEntity = SystemAPI.GetSingletonEntity<PlayerComponent>();
-			var playerTr     = SystemAPI.GetComponentRO<LocalTransform>(playerEntity);
+			var playerTr     = SystemAPI.GetComponentRO<LocalToWorld>(playerEntity);
 
-			var ecb    = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-			var writer = ecb.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
-			
-			foreach (var localTransform in SystemAPI.Query<RefRO<LocalTransform>>()
+			foreach (var localTransform in SystemAPI.Query<RefRO<LocalToWorld>>()
 			                                        .WithAll<AiTelemetry>()) {
 				var updateTelemetryJob = new UpdateAiTelemetryJob {
 					PlayerPosition = playerTr.ValueRO.Position,
