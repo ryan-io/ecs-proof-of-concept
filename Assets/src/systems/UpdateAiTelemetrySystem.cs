@@ -19,32 +19,23 @@ namespace src.systems {
 			var playerEntity = SystemAPI.GetSingletonEntity<PlayerComponent>();
 			var playerTr     = SystemAPI.GetComponentRO<LocalToWorld>(playerEntity);
 
-			foreach (var localTransform in SystemAPI.Query<RefRO<LocalToWorld>>()
-			                                        .WithAll<AiTelemetry>()) {
-				var updateTelemetryJob = new UpdateAiTelemetryJob {
-					PlayerPosition = playerTr.ValueRO.Position,
-					AiPosition     = localTransform.ValueRO.Position
-				};
+			var updateTelemetryJob = new UpdateAiTelemetryJob {
+				PlayerPosition = playerTr.ValueRO.Position,
+			};
 
-				var handle = updateTelemetryJob.ScheduleParallel(state.Dependency);
-				handle.Complete();
-			}
+			var handle = updateTelemetryJob.ScheduleParallel(state.Dependency);
+			handle.Complete();
 		}
 	}
 
 	[BurstCompile]
 	public partial struct UpdateAiTelemetryJob : IJobEntity {
-		public float3                             PlayerPosition;
-		public float3                             AiPosition;
+		public float3 PlayerPosition;
 
 		[BurstCompile]
 		public void Execute(AiTelemetryAspect telemetry) {
-			var sqDist  = math.distancesq(AiPosition, PlayerPosition);
-			var heading =  math.normalizesafe(PlayerPosition - AiPosition);
-			heading = new float3(heading.x, heading.y, 0);
-			
-			telemetry.SetTelemetryHeading(heading);
-			telemetry.SetTelemtrySqDistToPlayer(sqDist);
+			telemetry.SetTelemetryHeading(PlayerPosition);
+			telemetry.SetTelemetrySqDistToPlayer(PlayerPosition);
 		}
 	}
 }
