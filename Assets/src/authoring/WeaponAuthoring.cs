@@ -10,7 +10,7 @@ namespace src {
 
 		public class WeaponAuthoringBaker : Baker<WeaponAuthoring> {
 			public override void Bake(WeaponAuthoring authoring) {
-				var entity = GetEntity(TransformUsageFlags.Dynamic);
+				var entity = GetEntity(TransformUsageFlags.None);
 
 				AddComponent(entity,
 					new WeaponComponent {

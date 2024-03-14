@@ -13,7 +13,7 @@ namespace src {
 
 		public class SpawnManyEntityAuthoringBaker : Baker<SpawnManyEntityAuthoring> {
 			public override void Bake(SpawnManyEntityAuthoring authoring) {
-				var entity = GetEntity(TransformUsageFlags.Dynamic);
+				var entity = GetEntity(TransformUsageFlags.None);
 				var width  = math.abs(authoring.RegionWidth);
 				var height = math.abs(authoring.RegionHeight);
   

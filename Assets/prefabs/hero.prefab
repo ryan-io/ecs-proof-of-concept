@@ -100,8 +100,8 @@ MonoBehaviour:
       y: 0
   Sorting:
     StaticSorting: 0
-    SortingIndex: 0
-    SortingLayer: 0
+    SortingIndex: 10
+    SortingLayer: -791865685
 --- !u!1 &5541498282399753535
 GameObject:
   m_ObjectHideFlags: 0
@@ -114,7 +114,6 @@ GameObject:
   - component: {fileID: 4163121179756296937}
   - component: {fileID: 7945543022632585600}
   - component: {fileID: 5218229925375693963}
-  - component: {fileID: 951684438583509659}
   - component: {fileID: 5790823867846042889}
   m_Layer: 0
   m_Name: hero
@@ -153,6 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <InitialMovementSpeed>k__BackingField: 1
+  <InitialHealth>k__BackingField: 10
 --- !u!114 &7945543022632585600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,18 +183,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Prefab>k__BackingField: {fileID: 4665226911194871051, guid: 042e9f0d79a06fa4e801602b0f1635a6, type: 3}
---- !u!114 &951684438583509659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5541498282399753535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f9b03fd50aa4a679006bec5fa83be53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5790823867846042889
 MonoBehaviour:
   m_ObjectHideFlags: 0

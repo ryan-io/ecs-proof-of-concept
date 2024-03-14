@@ -1,6 +1,7 @@
 ﻿// src
 
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -34,8 +35,10 @@ namespace src.systems {
 
 		[BurstCompile]
 		public void Execute(AiTelemetryAspect telemetry) {
-			telemetry.SetTelemetryHeading(PlayerPosition);
-			telemetry.SetTelemetrySqDistToPlayer(PlayerPosition);
+			telemetry.SetSqDistToPlayer(PlayerPosition);
+			telemetry.SetSqDistToHome();
+			telemetry.SetHeadingToPlayer(PlayerPosition);
+			telemetry.SetHeadingToHome();
 		}
 	}
 }

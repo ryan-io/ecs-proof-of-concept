@@ -37,6 +37,9 @@ namespace src {
 
 		[field: SerializeField, ShowIf("@IsHostile")]
 		public float DistanceBeforeHostileSq { get; private set; } = 100;
+		
+		[field: SerializeField, ShowIf("@CanMove")]
+		public float DistanceBeforeFromReturn { get; private set; } = 0.2f;
 
 		bool CanWalkInternal    => CanMove && CanWalk;
 		bool CanRunInternal     => CanMove && CanRun;
@@ -78,8 +81,9 @@ namespace src {
 				}
 
 				if (authoring.IsHostile) {
-					AddComponent(entity, new DistanceBeforeHostileComponent {
-						DistanceSq = authoring.DistanceBeforeHostileSq
+					AddComponent(entity, new CriticalDistances {
+						DistanceSq = authoring.DistanceBeforeHostileSq,
+						DistanceSqFromReturn =  authoring.DistanceBeforeFromReturn
 					});
 				}
 			}

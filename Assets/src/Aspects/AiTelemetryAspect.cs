@@ -9,13 +9,25 @@ namespace src {
 		public readonly Entity Self;
 
 		[BurstCompile]
-		public void SetTelemetryHeading(float3 playerPos) {
-			var vector = math.normalizesafe(playerPos - m_tr.ValueRO.Position );
+		public void SetHeadingToPlayer(float3 playerPos) {
+			var vector = math.normalizesafe(playerPos - m_tr.ValueRO.Position);
 			m_telemetry.ValueRW.HeadingToPlayer = new float3(vector.x, vector.y, 0);
 		}
 
 		[BurstCompile]
-		public void SetTelemetrySqDistToPlayer(float3 playerPos) {
+		public void SetHeadingToHome() {
+			var vector = math.normalizesafe(m_telemetry.ValueRO.InitialPosition - m_tr.ValueRO.Position);
+			m_telemetry.ValueRW.HeadingToHome = new float3(vector.x, vector.y, 0);
+		}
+
+		[BurstCompile]
+		public void SetSqDistToHome() {
+			m_telemetry.ValueRW.SqDistanceToHome = math.distancesq(
+				m_tr.ValueRO.Position, m_telemetry.ValueRO.InitialPosition);
+		}
+
+		[BurstCompile]
+		public void SetSqDistToPlayer(float3 playerPos) {
 			m_telemetry.ValueRW.SqDistanceToPlayer = math.distancesq(m_tr.ValueRO.Position, playerPos);
 		}
 

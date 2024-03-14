@@ -16,6 +16,17 @@ namespace src {
 				});
 				
 				AddComponent(entity, new MovementModifierComponent {Speed = authoring.InitialMovementSpeed} );
+				
+				AddComponent(entity, new InputComponent());
+				
+				AddComponent(entity, new PlayerWeakAttackInputTag());
+				SetComponentEnabled<PlayerWeakAttackInputTag>(entity, false);
+				
+				AddComponent(entity, new PlayerStrongAttackInputTag());
+				SetComponentEnabled<PlayerStrongAttackInputTag>(entity, false);
+				
+				AddComponent(entity, new PlayerDodgeInputTag());
+				SetComponentEnabled<PlayerDodgeInputTag>(entity, false);
 			}
 		}
 	}

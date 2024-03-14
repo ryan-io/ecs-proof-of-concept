@@ -6,7 +6,7 @@ namespace src {
 	public class RandomNumGenAuthoring : MonoBehaviour {
 		public class RandomNumGenAuthoringBaker : Baker<RandomNumGenAuthoring> {
 			public override void Bake(RandomNumGenAuthoring authoring) {
-				var entity = GetEntity(TransformUsageFlags.Dynamic);
+				var entity = GetEntity(TransformUsageFlags.None);
 				AddBuffer<Position2DBuffer>(entity);
 				
 				AddComponent(entity, new RandomNumGenData {

@@ -110,11 +110,15 @@ namespace src.systems {
 
 		[BurstCompile]
 		public void Execute(MoveAspect move) {
-			if (!move.IsInHostileRange()) {
-				return;
+			var isInRange = move.IsInHostileRange();
+			if (!isInRange) {
+				if (move.IsHome)
+					return;
+				move.MoveHome(MoveSpeed, DeltaTime);
 			}
-
-			move.MoveTowardsPlayer(MoveSpeed, DeltaTime);
+			else {
+				move.MoveTowardsPlayer(MoveSpeed, DeltaTime);
+			}
 		}
 	}
 }
